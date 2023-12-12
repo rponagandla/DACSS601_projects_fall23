@@ -1,0 +1,337 @@
+---
+title: "Challenge_7: Concepts and Practices of Research Design for a Data Science Project"
+author: "Rachana Ponagandla"
+description: "Solutions"
+date: "11/27/2023"
+format:
+  html:
+    df-print: paged
+    css: "styles.css"
+    embed-resources: true
+    self-contained-math: true
+categories:
+  - weekly_challenges
+  - challenge_7
+---
+
+**Make sure you change the author's name in the above YAML header.**
+
+## Setup
+
+If you have not installed the following packages, please install them before loading them.
+
+```{r}
+#| label: setup
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(readxl)
+library(haven) #for loading other datafiles (SAS, STATA, SPSS, etc.)
+library(stringr) # if you have not installed this package, please install it.
+library(ggplot2) # if you have not installed this package, please install it.
+library(lubridate)
+library(zoo)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Challenge Overview
+
+In this challenge, we will apply the knowledge about research design and other topics covered in lectures so far to the dataset presented.
+
+There will be coding components and writing components. Please read the instructions for each part and complete your challenges.
+
+## Part 1. Choose one of the following datasets to do a simple practice of research design and hypothesis testing (50%)
+
+Dataset 1: The General Social Survey (2022). You can find more information about this data project at <https://gss.norc.org/About-The-GSS>. A codebook explaining the definition of each variable and column is also included.
+
+Dataset 2: The Covid-19 Reports in Massachusetts. The datasets are stored in an Excel file of multiple sheets. You can find more information about this data project in the "Introduction", "Definition", "Notes", and "Data Dictionary" tabs in the Excel file.
+
+1.  **Read the data you choose in R. (5%)**
+
+    For GSS, there is only one data sheet (.dta).
+
+    For the MA Covid-19 reports, you can choose **one of the four datasheets(tabs in Excel)** to read ("Weekly Cases and Deaths", "Case and Death Demographics", "County Data", and "City and Town Data").
+
+    I'm using Covid-19 reports dataset and I'm choosing the "Case and Death Demographics" datasheet.
+
+```{r}
+
+covid_data <- read_excel("_data/covid-19-dashboard-11-16-23.xlsx", sheet = "Case and Death Demographics")
+head(covid_data)
+
+```
+
+2.  **Answer the following questions.**
+
+    \(1\) what is the structure (dimension) of the data? **(2.5%)**
+
+    The data has 380 rows and 16 columns
+
+    ```{r}
+    dim(covid_data)
+    ```
+
+    \(2\) what is the unit of observation? **(2.5%)**
+
+    The unit of observation in this data is demographic subgroup within a specific week. Each row in the dataset represents the Covid-19 case and death statistics for a specific demographic subgroup(such as a specific race or ethnic group or age) during a specific week.
+
+3.  **Read the overview introduction, codebook (for the GSS data), and other related information about the data (for the Covid-19 data). Now browse the data loaded in R, it seems like there are many different questions this data can answer.** **Based on the class lecture and KKV's reading about "good research questions", please propose ONE research question that can be answered using this data. (5%)**
+
+    Does age significantly influence the number of Covid-19 related deaths in Massachusetts during the 2023-2024 season?
+
+4.  **Based on the research question you proposed above, propose a hypothesis about a possible relationship between two items. (5%)**
+
+    Hypothesis: The number of Covid-19 related deaths in Massachusetts during the 2023-2024 season is significantly higher in older age groups compared to younger age groups.
+
+5.  **Based on the hypothesis proposed, please select variables/columns in the data to measure the corresponding concepts in the hypothesis statement. You should select at least one variable/column to measure each concept.**
+
+    **You should also specify which variables/columns you choose and explain why they are the proper ones to measure the concepts. (10%)**
+
+    **Instruction:** Don't just answer, "They are reliable and valid". Instead, you should discuss more why they are reliable (can consistently produce the same results regardless of the same results regardless different times and contexts) and valid (why it is better than other possible or alternative variables/columns). You can find the concepts of validity and reliability in the Nov 20 lecture and the slides (p23-25). There are also more in-depth introductions online, such as [this page](http://media.acc.qcc.cuny.edu/faculty/volchok/Measurement_Volchok/Measurement_Volchok6.html).
+
+    **Answer**: Based on the hypothesis, we can select the following variables/columns from the data:
+
+    **Group and Subgroup**: These variables categorize individuals into different demographic groups, which include age groups. They directly represent the independent variable (age group) in our hypothesis. They are reliable because they consistently categorize individuals into the same demographic groups across different times and contexts. They are valid because they directly group the population based on age, which is the variable of interest in your hypothesis. The "Group" column indicates the type of demographic information (e.g., "Age"), and the "Subgroup" column provides the specific categories within each type (e.g., "\<5 years", "5-19 years"). This allows us to accurately identify and compare different age groups, which is exactly what we need for our hypothesis.
+
+    **Deaths during this week**: This variable represents the number of Covid-19 related deaths that occurred during a specific week. This variable is reliable as it should consistently represent the same thing (number of deaths) across different times and contexts. This means that the way deaths are counted and recorded does not change over time. It's also valid for our purposes as it directly measures the Covid-19 related deaths. Each entry in this column represents the actual number of deaths that occurred during a specific week.
+
+6.  **Use the code we learned in the previous week to conduct descriptive statistics for the two variables/columns you selected above. You should present the following information in your descriptive statistics: range, average, standard deviation, the number of NAs, and the number of unique values. (5%)**
+
+    Since age groups are categorical data, measures like range, average, and standard deviation are not applicable. Instead we can count number of unique age groups, number of NAs in age groups, Frequency of each age group.
+
+    Note that I've filtered out subgroup with "Unknown age" value.
+
+    ```{r}
+
+    research_data <- covid_data %>%
+      select("Group", "Subgroup", "Deaths during this week")
+
+    research_data <- research_data %>%
+      filter(Group == "Age" & Subgroup != "Unknown age")  %>%
+      #mutate("Age_group" = Subgroup) %>%
+      select(Subgroup, `Deaths during this week`)
+
+    unique_age_groups <- length(unique(research_data$Subgroup))
+    na_age_groups <- sum(is.na(research_data$Subgroup))
+
+    cat("Number of unique age groups: ", unique_age_groups, "\n",
+        "Number of NAs in age groups: ", na_age_groups, "\n")
+
+    age_group_freq <- table(research_data$Subgroup)
+
+    cat("Frequency of each age group:\n")
+    print(age_group_freq)
+
+
+    ```
+
+    Descriptive statistics for Deaths during this week column:
+
+    ```{r}
+
+    research_data$`Deaths during this week` <- as.numeric(research_data$`Deaths during this week`)
+
+    range_deaths <- range(research_data$`Deaths during this week`, na.rm = TRUE)
+    average_deaths <- mean(research_data$`Deaths during this week`, na.rm = TRUE)
+    sd_deaths <- sd(research_data$`Deaths during this week`, na.rm = TRUE)
+    na_deaths <- sum(is.na(research_data$`Deaths during this week`))
+    unique_deaths <- length(unique(research_data$`Deaths during this week`))
+
+    cat("Range of deaths: ", range_deaths, "\n",
+        "Average deaths: ", average_deaths, "\n",
+        "Standard deviation of deaths: ", sd_deaths, "\n",
+        "Number of NAs in deaths: ", na_deaths, "\n",
+        "Number of unique values in deaths: ", unique_deaths)
+
+
+    ```
+
+7.  **Plot one univariate graph for each of the variables/columns. (5%)**
+
+    ```{r}
+
+    ggplot(research_data, aes(x=Subgroup)) +
+      geom_bar(fill="blue", color="black") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      labs(title="Bar chart of Age Groups",
+           x="Age Group",
+           y="Frequency")
+    ```
+
+    ```{r}
+
+    ggplot(research_data, aes(x=`Deaths during this week`)) +
+      geom_histogram(binwidth=1, fill="blue", color="black") +
+      theme_minimal() +
+      labs(title="Histogram of Deaths during the week",
+           x="Deaths during the week",
+           y="Frequency")
+    ```
+
+8.  **Finally, plot a graph to visually test the hypothesis you propose. Based on the visual evidence, do you see any potential correlation between the two variables? (10%)**
+
+    ```{r}
+
+    research_data <- aggregate(`Deaths during this week` ~ Subgroup, research_data, sum)
+    age_order <- c("<5 years", "5-19 years", "20-34 years", "35-49 years", "50-64 years", "65-79 years", "80+ years")
+    research_data$Subgroup <- factor(research_data$Subgroup, levels = age_order, ordered = TRUE)
+
+    ggplot(research_data, aes(x=Subgroup, y=`Deaths during this week`)) +
+      geom_bar(stat="identity", fill="blue") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      labs(title="Covid-19 Deaths by Age Group",
+           x="Age Group",
+           y="Number of Deaths")
+    ```
+
+    **Observations**:
+
+    Based on the visual evidence from the bar chart, there is a positive correlation between age group and the number of Covid-19 related deaths. The number of deaths increase with each successive age group, with the highest number of deaths observed in the "80+ years" age group. The number of deaths in the older age groups are more when compared to the number of deaths in the younger age groups. Hence, the hypothesis "The number of Covid-19 related deaths in Massachusetts during the 2023-2024 season is significantly higher in older age groups compared to younger age groups." is correct.
+
+## Part 2. Reviewing the findings of a graph by examining the raw data.
+
+This part of the challenge is based on a scenario. Suppose you are a data scientist who provides consulting services to the government. One day, your client asks you to investigate an article by the New York Times that reported on some research on people's confidence in the institutions of democracy. It had been published in an academic journal. The headline in the Times ran, ["How Stable Are Democracies? 'Warning Signs Are Flashing Red'" (Taub, 2016)](https://www.nytimes.com/2016/11/29/world/americas/western-liberal-democracy.html). The graph accompanying the article, as shown below, plots people's responses to a question in the World Value Survey (WVS) (V162-Importance of democracy). The graph certainly seemed to show an alarming decline. The graph was widely circulated on social media. It's an elegant small-multiple that, in addition to the point ranges it identifies, also shows an error range (labeled as such for people who might not know what it is), and the story told across the panels for each country is pretty consistent.
+
+![](https://socviz.co/assets/ch-01-democracy-nyt-version.png){fig-align="center" width="1000"}
+
+1.  **Please briefly describe the major findings of this graph. (5%)**
+
+    Major findings from the graph:
+
+    -   The graph shows the percentage of people who believe it is "essential" to live in a democracy, broken down by country and generation (decade of birth).
+    -   The countries included are Sweden, Australia, the Netherlands, the United States, New Zealand, and Britain.
+    -   There is a noticeable downward trend across all countries in the belief that living in a democracy is essential.
+    -   The younger generations are less likely to believe it is "essential" to live in a democracy compared to older generations.
+    -   The declining trend is more evident in United States, Australia, New Zealand and Sweden.
+
+2.  **Your client is concerned about the findings of this graph.** On the one hand, they are surprised and worried by the "crisis of democracy" presented in this graph**. On the other hand, they also doubt the argument of the NYT article and the validity of the findings of this graph.** Before deciding on making any policy to respond, they ask you to conduct some additional research with the original data.
+
+    \(1\) Read the provided WVS data. The dataset is large, so you must subset it before analyzing it. **Please keep only the following columns: respondents' country(V2), age(V236), and the question for plotting (V162).** You also need to filter only the observations in the six countries mentioned above: Sweden, Australia, Netherlands, United States, New Zealand, and Britain/United Kingdom. **(10%)**
+
+    Note: all the columns, including those that are measured categorically, are represented by numbers. You must check out the WVS5 codebook to identify what the numerical values mean (especially for V2-country, see p57 of the codebook).
+
+    ```{r}
+
+    data <- read_rds("_data/WVS5.rds")
+
+    data <- data[, c("V2", "V236", "V162")]
+
+    data <- data %>% 
+      filter(V2 %in% c(752, 36, 528, 840, 554, 826))
+
+    head(data)
+
+    ```
+
+    \(2\) Conduct descriptive statistics to show these three columns' unique values, means, ranges, and numbers of NA. You can plot univariate graphs as we did in challenge#4 or apply the summary statistics function as in challenge#3. Just do either approach. **(10%）**
+
+    Answer:
+
+    As V2 is a categorical variable which represents country using country codes, measures like range, mean are not applicable. Instead we can count number of unique values, number of NAs and show the unique values.
+
+    ```{r}
+      cat("Column: V2","\n",
+          "Number of NAs: ", sum(is.na(data$V2)), "\n",
+          "Number of unique values: ", length(unique(data$V2)), "\n",
+          "Unique values: ", unique(data$V2), "\n")
+    ```
+
+    ```{r}
+
+    filtered_data <- data[data$V236 != -2,]
+
+    cat("Column: V236","\n",
+    "Mean: ", mean(filtered_data$V236, na.rm = TRUE), "\n",
+    "Range: ", min(filtered_data$V236, na.rm = TRUE), " to ", max(filtered_data$V236, na.rm = TRUE), "\n",
+    "Number of NAs: ", sum(is.na(data$V236)) + sum(data$V236 == -2), "\n",
+    "Number of unique values: ", length(unique(data$V236)), "\n",
+    "Unique values: ", unique(data$V236), "\n")
+
+    ```
+
+    ```{r}
+    filtered_data <- data[data$V162 > 0,]
+
+    cat("Column: V162","\n",
+    "Mean: ", mean(filtered_data$V162, na.rm = TRUE), "\n",
+    "Range: ", min(filtered_data$V162, na.rm = TRUE), " to ", max(filtered_data$V162, na.rm = TRUE), "\n",
+    "Number of NAs: ", sum(is.na(data$V162)) + sum(data$V162 < 0), "\n",
+    "Number of unique values: ", length(unique(data$V162)), "\n",
+    "Unique values: ", unique(data$V162), "\n")
+
+    ```
+
+    \(3\) (Optional) Please replicate the graph of the NYT article.
+
+    ```{r}
+    #type your code here
+    ```
+
+    \(4\) Now, please plot a graph to show the relationship between the decades of birth (x-axis) and the average level of the response scores to the question "importance of democracy" (y-axis) for each of the six countries. You can use facet_grid or facet_wrap to combine multiple graphs into a matrix of panels. **(15%)**
+
+    ```{r}
+    country_codes <- c('752' = 'Sweden', '36' = 'Australia', '528' = 'Netherlands', 
+                       '840' = 'United States', '554' = 'New Zealand', '826' = 'Britain')
+    names(country_codes) <- as.numeric(names(country_codes))
+    country_codes <- country_codes[order(as.numeric(names(country_codes)))]
+
+    data$Country <- factor(data$V2, labels = country_codes)
+
+
+    data <- data %>% 
+      filter(V2 %in% c(752, 36, 528, 840, 554, 826)) %>%
+      mutate(Decade_of_Birth = cut(V236, breaks = seq(1910, 1990, by = 10),
+                                   labels = c("1910s", "1920s", "1930s", "1940s", 
+                                              "1950s", "1960s", "1970s", "1980s"), include.lowest = TRUE)) %>%
+      drop_na(Decade_of_Birth)
+
+    data_summary <- data %>% 
+      group_by(Country, Decade_of_Birth) %>% 
+      summarise(Average = mean(V162, na.rm = TRUE)
+                ) %>% 
+      ungroup()
+
+    ggplot(data_summary, aes(x = Decade_of_Birth, y = Average, group = Country, color = Country)) +
+      geom_line() +
+      geom_point() +
+      facet_wrap(~Country, scales = 'free') +
+      theme_minimal() +
+      labs(title = "Average Importance of Democracy by Decade of Birth",
+           x = "Decade of Birth",
+           y = "Average Importance of Democracy",
+           color = "Country") +
+      theme(legend.position = "bottom", 
+            axis.text.x = element_text(angle = 90, hjust = 1))
+
+    ```
+
+3.  **Describe what you find from the graph you made above. Compared to the graph on NYT, what's in common, or what's different? Please type your answer below. (5%)**
+
+    **Findings from the graph:**\
+    The graph depicts the average importance score of democracy by respondents from six different countries, broken down by their decades of birth.
+
+    I can observe that the average importance of democracy is lesser in younger generations compared to the older generations in Australia, Sweden, Britain, Netherlands and United States.
+
+    In New Zealand, I see consistent negative value -4 across all decades, which means that the importance of democracy question is either not asked or not answered. In Australia, importance of democracy starts high among 1920s followed by gradual decrease after 1950s. In Netherlands and Britain, we observe almost constant decrease in importance of democracy until 1940s and gradual decrease towards 1980s. In Sweden, we see a constant decrease in the average importance of from 1910s(older generations) to 1980s(younger generations). In the united states, we see a sharp increase in democracy score among 1930s and gradually decreases towards 1980s(younger generations).
+
+    Overall, we can say that except for New Zealand, all other 5 countries see a decline in the average importance of democracy in younger generations compared to older generations.
+
+    **Differences between plotted graph and NYT graph:**
+
+    \
+    NYT graph presents democracy data as percentages of the population that find it essential to live in a democracy, whereas our graph used average importance scores of democracy answered by people of different generations. Both measure 2 different but relevant things. Let's compare 2 graphs starting from 1930s to be in sync.
+
+    The trend for the New Zealand is different in 2 graphs. In NYT graph, we see a rapid decline, but in the plotted graph, as the democracy question is either not asked or not answered in the given WV5 data, we cannot infer the importance of democracy from the corresponding graph. The trend for There are also slight differences in trends in Britain between 1940s and 60s. In NYT graph, we can see that democracy importance gradually increased from 1940s to 60s and then started decreasing. Whereas in plotted graph, the score gradually decreases in that period.
+
+    I can also observe that the overall decline in the trend is very high in NYT graph compared to the above plotted graph.
+
+    **Commonalities with graph on NYT:**
+
+    Although both graphs measure different trends but they are relevant in telling about the importance of democracy among generations. The trend for Sweden, United States and Netherlands for both the graphs from 1930s to 1980s are almost the same. Overall, we can observe from both the graphs that importance of democracy in the younger generations is less when compared to the older generations.
+
+4.  **Your client wants to hear your conclusion. Do you agree with the argument presented by the graph and the NYT article? Should we really worry about the decline? This is an op-ed question. Please type your answer below. (5%)**
+
+    Yes, I agree with the argument presented by the graph and the NYT article. We need to worry about the decline because the observed decline in the importance of democracy among younger generations in both the plotted graph and the NYT article is consistent across most of the countries, suggesting a real trend that needs attention. I can't say much about decline in New Zealand because of unavailable data on ratings. Particularly in Australia, Sweden, Netherlands, United States and Britain, the decline is more and we need to pay attention.

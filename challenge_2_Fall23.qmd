@@ -1,0 +1,530 @@
+---
+title: "Challenge_2: Data Transformation(2), Pivot and Date-Time Data"
+author: "Rachana Ponagandla"
+description: ""
+date: "09/26/2023"
+format:
+  html:
+    df-print: paged
+    css: "styles.css"
+    embed-resources: true
+    self-contained-math: true
+categories:
+  - weekly_challenges
+  - challenge_2
+---
+
+**Make sure you change the author's name in the above YAML header.**
+
+## Setup
+
+If you have not installed the following packages, please install them before loading them.
+
+```{r}
+#| label: setup
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(readxl)
+library(haven) #for loading other datafiles (SAS, STATA, SPSS, etc.)
+library(stringr) # if you have not installed this package, please install it.
+library(lubridate)
+library(dplyr)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Challenge Overview
+
+Building on the lectures in week#3 and week#4, we will continually practice the skills of different transformation functions with Challenge_2. In addition, we will explore the data more by conducting practices with pivoting data and dealing with date-time data.
+
+There will be coding components and writing components. Please read the instructions for each part and complete your challenges.
+
+## Datasets
+
+There are four datasets provided in this challenge. Please download the following dataset files from Canvas or Google Classroom and save them to a folder within your project working directory (i.e.: "yourworkingdiectory_data"). If you don't have a folder to store the datasets, please create one.
+
+-   ESS_5.dta (Part 1) ⭐
+-   p5v2018.sav (Part 1)⭐
+-   austrlian_data.csv (Part 3)⭐
+-   FedFundsRate.csv (Part 4)⭐
+
+Find the `_data` folder, then use the correct R command to read the datasets.
+
+## Part 1(Required). Depending on the data you chose in Challenge#1 (ESS_5 or Polity V), please use that data to complete the following tasks
+
+## **If you are using the ESS_5 Data:**
+
+1.  **Read the dataset and keep the first 39 columns.**
+
+```{r}
+#Type your code here
+ess5 <- read_dta("_data/ESS_5.dta")
+ess5 <- ess5[, 1:39]
+dim(ess5)
+```
+
+2.  **Conduct the following transformation for the data by using mutate() and other related functions :**
+
+    \(1\) Create a new column named "YearOfBirth" using the information in the "age" column.
+
+    \(2\) Create a new column named "adult" using the information in the "age" column.
+
+    \(3\) Recode the "commonlaw" column: if the value is 0, recode it as "non-common-law"; if the value is 1, recode it as "common-law".
+
+    \(4\) Recode the "vote" column: if the value is 3, recode it as 1; if the value is smaller than 3, recode it as 0. Make sure to exclude the NAs.
+
+    \(5\) Move the column "YearOfBirth", "adult," "commonlaw" and "vote" right after the "essround" column (the 2nd column in order).
+
+    \(6\) Answer the question: What is the data type of the "commonlaw" column before and after recoding? And what is the data type of the "vote" column before and after recoding?
+
+```{r}
+#Type your code here
+current_year <- as.integer(format(Sys.Date(), "%Y"))
+ess5 <- ess5 %>%
+  mutate(YearOfBirth = current_year - age)
+
+ess5 <- ess5 %>%
+  mutate(adult = ifelse(age >= 18, 1, 0))
+
+
+commonlaw_type_before <- typeof(ess5$commonlaw)
+
+ess5 <- ess5 %>%
+  mutate(commonlaw = case_when(
+    commonlaw == 0 ~ "non-common-law",
+    commonlaw == 1 ~ "common-law",
+    TRUE ~ as.character(commonlaw)
+  ))
+
+commonlaw_type_after <- typeof(ess5$commonlaw)
+
+vote_type_before <- typeof(ess5$vote)
+
+ess5 <- ess5 %>%
+  mutate(vote = case_when(
+    is.na(vote) ~ NA_real_,
+    vote == 3 ~ 1,
+    vote < 3 ~ 0,
+    TRUE ~ vote
+  ))
+vote_type_after <- typeof(ess5$vote)
+
+
+ess5 <- ess5 %>%
+  relocate(YearOfBirth, adult, commonlaw, vote, .after = essround)
+
+head(ess5)
+
+cat("The data type of 'commonlaw' before recoding is:", commonlaw_type_before, "\n")
+cat("The data type of 'commonlaw' after recoding is:", commonlaw_type_after, "\n")
+cat("The data type of 'vote' before recoding is:", vote_type_before, "\n")
+cat("The data type of 'vote' after recoding is:", vote_type_after, "\n")
+
+```
+
+## **If you are using the Polity V Data:**
+
+1.  **Read the dataset and keep the first 11 columns.**
+
+```{r}
+#Type your code here
+```
+
+2.  **Conduct the following transformation for the data by using mutate() and other related functions :**
+
+    \(1\) Create a new column named "North America" using the information in the "country" column. Note: "United States," "Mexico," or "Canada" are the countries in North America. In the new "North America" column, if a country is one of the above three countries, it should be coded as 1, otherwise as 0.
+
+    \(2\) Recode the "democ" column: if the value is 10, recode it as "Well-Functioning Democracy"; if the value is greater than 0 and smaller than 10, recode it as "Either-Autocracy-or-Democracy"; if the value is 0, recode it as "Non-democracy"; if the value is one of the following negative integers (-88, -77, and -66), recode it as "Special-Cases."
+
+    \(3\) Move the column "North America" and "democ" right before the "year" column (the 6th column in order).
+
+    \(4\) Answer the question: What is the data type of the "North America" column? What is the data type of the "democ" column before and after recoding?
+
+```{r}
+#Type your code here
+```
+
+## Part 2. Generate your own Data
+
+1.  **Generate an untidy data that includes 10 rows and 10 columns. In this dataset, column names are not names of variables but a value of a variable.**
+
+    \*Note: do not ask ChatGPT to generate a dataframe for you. I have already checked the possible questions and answers generated by AI.
+
+```{r}
+
+cities <- c("New York", "San Jose", "san Diego", "Boston", "Austin", 
+            "Foster City", "Amherst", "Worcester", "Los Angeles", "Las Vegas")
+
+df <- data.frame(
+  City = cities,
+  `2014` = sample(10000:100000, 10),
+  `2015` = sample(10000:100000, 10),
+  `2016` = sample(10000:100000, 10),
+  `2017` = sample(10000:100000, 10),
+  `2018` = sample(10000:100000, 10),
+  `2019` = sample(10000:100000, 10),
+  `2020` = sample(10000:100000, 10),
+  `2021` = sample(10000:100000, 10),
+  `2022` = sample(10000:100000, 10),
+  check.names = FALSE
+)
+print(df)
+
+```
+
+2.  **Use the correct pivot command to convert the data to tidy data.**
+
+```{r}
+tidy_df <- df %>% 
+  pivot_longer(cols = -City, 
+               names_to = "Year", 
+               values_to = "Population")
+
+print(tidy_df)
+
+```
+
+3.  **Generate an untidy data that includes 10 rows and 5 columns. In this dataset, an observation is scattered across multiple rows.**
+
+```{r}
+data <- data.frame(
+  Country = rep(c('France', 'USA', 'UK', 'Japan', 'Germany'), each=2),
+  Continent = rep(c('Europe', 'North America', 'Europe', 'Asia', 'Europe'), each=2),
+  Year = rep(c(2022, 2023, 2024, 2025, 2026), each=2),
+  Variables = rep(c('GDP per Capita', 'Average Temperature'), times=5),
+  Values = c(71680, 11.3, 63998, 12.0, 48922, 11.6, 40803, 16.0, 50206, 9.6)
+)
+
+print(data)
+
+
+```
+
+3.  **Use the correct pivot command to convert the data to tidy data.**
+
+```{r}
+library(tidyverse)
+
+# Assuming 'data' is your original dataset
+tidy_data <- data %>%
+  pivot_wider(names_from = Variables, values_from = Values)
+
+print(tidy_data)
+
+```
+
+## Part 3. The Australian Data
+
+This is another tabular data source published by the [Australian Bureau of Statistics](https://www.abs.gov.au/) that requires a decent amount of cleaning. In 2017, Australia conducted a postal survey to gauge citizens' opinions towards same sex marriage: "Should the law be changed to allow same-sex couples to marry?" All Australian citizens are required to vote in elections, so citizens could respond in one of four ways: vote yes, vote no, vote in an unclear way(illegible), or fail to vote. (See the "Explanatory Notes" sheet for more details.)
+
+I have already cleaned up the data for you and you can directly import it. We will come back to clean and process the original "messy" data after we learn some string functions in the later weeks.
+
+1.  **Read the dataset "australian_data.csv":**
+
+```{r}
+#Type your code here
+australian_data <- read_csv("_data/australian_data.csv")
+
+rownames(australian_data) <- australian_data[[1]]
+australian_data <- australian_data[,-1]
+head(australian_data)
+```
+
+-   **Data Description: Please use the necessary commands and codes and briefly describe this data with a short writing paragraph answering the following questions.**
+
+    \(1\) What is the dimension of the data (# of rows and columns)?
+
+    Number of rows: 150\
+    Number of Columns: 6
+
+    ```{r}
+    dim(australian_data)
+    ```
+
+    \(2\) What do the rows and columns mean in this data?
+
+    Each row represents voting statistics for a specific electoral division or district.\
+    Each column represents the following:\
+    District: Name of the district
+
+    Yes - represents the number of people who voted Yes to the question "Should the law be changed to allow same-sex couples to marry?"
+
+    No - represents the number of people who voted No to the question
+
+    Illegible - represents number of people whose votes were illegible
+
+    No Response - The number of people who did not respond to the survey
+
+    Division - The division to which the district belongs
+
+    \(3\) What is the unit of observation? In other words, what does each case mean in this data?
+
+    The unit of observation in this data is each district. Each case or row provides voting statistics for a specific district, indicating how its citizens voted on the question of same-sex marriage.
+
+    \(4\) According to the lecture, is this a "tidy" data? Why?
+
+    In this data, the variables 'Yes', 'No', 'Illegible', and 'No Response' represent different levels of a single variable (Vote type) but are spread across multiple columns. In a tidy dataset, each variable should form a column
+
+    \(5\) If this is not a tidy data, please use the necessary commands to make it "tidy".
+
+    To tidy this data, we can gather these four columns into two: 'Vote Type' and 'Count'
+
+    ```{r}
+
+    library(tidyverse)
+
+    tidy_australian_data <- australian_data %>%
+      gather(key = "Vote Type", value = "Count", Yes, No, Illegible, `No Response`)
+
+
+    head(tidy_australian_data)
+
+    ```
+
+-   **Data Transformation: use necessary commands and codes and answer the following questions. If you reshape the data in the previous step, please work on the reshaped data.**
+
+    \(1\) How many districts and divisions are in the data?
+
+    ```{r}
+    library(dplyr)
+    num_districts <- length(unique(tidy_australian_data$District))
+    num_divisions <- length(unique(tidy_australian_data$Division))
+
+    cat("Number of districts", num_districts, "\n")
+    cat("Number of divisions", num_divisions, "\n")
+
+    ```
+
+    \(2\) Use mutate() to create a new column "district turnout(%)". This column should be the voting turnout in a given district, or the proportion of people cast votes (yes, no, and illegible) in the total population of a district.
+
+    ```{r}
+    tidy_australian_data <- tidy_australian_data %>%
+      group_by(District) %>%
+      mutate(total_votes = sum(Count[`Vote Type` %in% c("Yes", "No", "Illegible")])) %>%
+      mutate(total_population = sum(Count)) %>%
+      mutate(district_turnout = (total_votes / total_population) * 100) %>%
+      ungroup()
+
+    head(tidy_australian_data)
+    ```
+
+-   \(3\) please use summarise() to estimate the following questions.
+
+    -   In total, how many people support same-sex marriage in Australia, and how many people oppose it?
+
+        Number of people supporting same-sex marriage: 7817247
+
+        Number of people opposing same-sex marriage: 4873987
+
+    ```{r}
+    support_opposition <- tidy_australian_data %>%
+      group_by(`Vote Type`) %>%
+      summarise(Total = sum(Count)) %>%
+      filter(`Vote Type` %in% c("Yes", "No"))
+
+    print(support_opposition)
+    ```
+
+-   Which *district* has ***most people*** supporting the policy, and how many?
+
+    *District* that has ***most people*** supporting the policy - Canberra(d)
+
+    ```{r}
+    most_support_district <- tidy_australian_data %>%
+      filter(`Vote Type` == "Yes") %>%
+      arrange(desc(Count)) %>%
+      select(District, Count) %>%
+      slice(1)
+
+    print(most_support_district)
+
+    ```
+
+-   Which *division* has the highest approval rate (% of "yes" in the total casted votes)? And what is the average approval rate at the *division level?*
+
+    Division having highest approval: Australian Capital Territory Divisions
+
+    ```{r}
+    division_approval <- tidy_australian_data %>%
+      group_by(Division) %>%
+      summarise(Approval_count = sum(Count[`Vote Type` == "Yes"]),
+                Total_votes = sum(Count[`Vote Type` %in% c("Yes", "No", "Illegible")])) %>%
+      mutate(Approval_rate = (Approval_count / Total_votes) * 100) %>%
+      ungroup()
+
+    highest_approval_division <- division_approval %>%
+      arrange(desc(Approval_rate)) %>%
+      slice(1)
+
+    print(highest_approval_division)
+
+
+    ```
+
+    I calculated the average approval rate at the *division level* using 2 assumptions:\
+    Assumption 1:\
+    Calculated approval rate at each division and took mean of all the values: 63.30475%
+
+    ```{r}
+    average_approval_rate <- mean(division_approval$Approval_rate)
+    cat("Average approval rate at the division level:", average_approval_rate, "%\n")
+    ```
+
+    Assumption 2:
+
+    calculated approval rate for all districts and finding average of all district's approval rates belonging to a division:
+
+    ```{r}
+
+    division_approval <- tidy_australian_data %>%
+      group_by(Division, District) %>%
+      summarise(
+        Approval_count = sum(Count[`Vote Type` == "Yes"]),
+        Total_votes = sum(Count[`Vote Type` %in% c("Yes", "No", "Illegible")])
+      ) %>%
+      mutate(District_approval_rate = (Approval_count / Total_votes) * 100) %>%
+      group_by(Division) %>%
+      summarise(Average_approval_rate = mean(District_approval_rate)) %>%
+      ungroup()
+    print(division_approval)
+    ```
+
+## Part 4. The Marco-economic Data
+
+This data set runs from July 1954 to March 2017, and includes daily macroeconomic indicators related to the *effective federal funds rate* - or [the interest rate at which banks lend money to each other](https://en.wikipedia.org/wiki/Federal_funds_rate) in order to meet mandated reserve requirements.
+
+1.  **Read the dataset "FedFundsRate.csv":**
+
+```{r}
+#Type your code here
+fed_rates_orig <- read.csv("_data/FedFundsRate.csv")
+
+```
+
+2.  **Data Description: Please use the necessary commands and codes and briefly describe this data with a short writing paragraph answering the following questions.**
+
+    ```{r}
+    #Type your code here
+    head(fed_rates_orig)
+    ```
+
+    \(1\) What is the dimension of the data (# of rows and columns)?
+
+    Number of rows: 904
+
+    Number of columns: 10
+
+    ```{r}
+    dim(fed_rates_orig)
+    ```
+
+    \(2\) What do the rows and columns mean in this data?
+
+    ```{r}
+    colnames(fed_rates_orig)
+    ```
+
+    **Rows**: Each row represents daily macroeconomic indicators for a specific day which can be identified by Year, Month, and Day columns.
+
+    \
+    **Columns**:
+
+    The dataset contains 10 columns("Year" , "Month" , "Day", "Federal.Funds.Target.Rate", "Federal.Funds.Upper.Target" , "Federal.Funds.Lower.Target" , "Effective.Federal.Funds.Rate", "Real.GDP..Percent.Change.", "Unemployment.Rate", "Inflation.Rate")
+
+    **Year, Month, Day**: These columns represent the Year, Month and Day respectively of the recorded data. **Federal Funds Target Rate**: The target interest rate set by the central bank for lending to other banks. **Federal Funds Upper Target** and **Federal Funds Lower Target**: These are the upper and lower bounds of the federal funds rate target range. **Effective Federal Funds Rate**: The actual interest rate at which banks lend money to each other. **Real GDP (Percent Change)**: represents the percent change in the Real Gross Domestic Product. **Unemployment Rate**: represents the unemployment rate. **Inflation Rate**: represents the inflation rate
+
+    \(3\) What is the unit of observation? In other words, what does each case mean in this data?
+
+    The unit of observation in the dataset is a specific day as determined by the Year, Month, and Day columns. Each case or row in this dataset represents macroeconomic indicators(federal funds target rate, the upper and lower targets for the federal funds rate, the effective federal funds rate, the percent change in real GDP, the unemployment rate, and the inflation rate) for a specific day.
+
+3.  **Generating a date column:**
+
+    Notice that the year, month, and day are three different columns. We will first have to use a string function called "str_c()" from the "stringr" library to combine these three columns into one "date" column. Please revise the following commands
+
+    ```{r}
+    library(dplyr)
+    library(stringr)
+
+    fed_rates <- fed_rates_orig %>%
+      mutate(date = str_c(Year, "-", sprintf("%02d", Month), "-", sprintf("%02d", Day)))
+
+
+    head(fed_rates)
+    #fed_rates<-fed_rates_orig |>
+    #  mutate(date = str_c(Year, Month, Day, sep="-"))
+
+
+    ```
+
+4.  **Move the new created "date" column to the beginning as the first column of the data.**
+
+    ```{r}
+    fed_rates <- fed_rates %>%
+      select(date, everything())
+    head(fed_rates)
+    ```
+
+5.  **What is the data type of the new "date" column?**
+
+    ```{r}
+    #Type your code here
+    class(fed_rates$date)
+
+    ```
+
+6.  **Transform the "date" column to a \<date\> data.**
+
+    ```{r}
+    #Type your code here
+    fed_rates$date <- as.Date(fed_rates$date, format="%Y-%m-%d")
+    class(fed_rates$date)
+    ```
+
+7.  **Conduct following statistics:**
+
+    \(1\) On which *date* is the highest unemployment rate? and the lowest?
+
+    Date with highest unemployment rate: 1982-11-01
+
+    Date with lowest unemployment rate: 1968-09-01
+
+    \(2\) (Optional) Which *decade* has the highest average unemployment rate?
+
+    Decade having highest average unemployment rate: 1974
+
+    Here is a template for you to create a decade column to allow you to group the data by decade. You can use it for the optional question in Challenge#1:
+
+    ```{r}
+    #fed_rates <- fed_rates |>
+    #  mutate(Decade = cut(Year, breaks = seq(1954, 2017, by = 10), labels = format(seq(1954, 2017, by = 10), format = "%Y")))
+
+
+    ##Note: the cut() a baseR function that we don't generally use. Basically, it allows us divides the range of Year into intervals and codes the values in Year according to which interval (1954 and 2017) they fall; the break argument specifies how we segmate the sequence of Year (by a decade)
+    # Highest unemployment rate
+
+    highest_unemployment <- fed_rates %>%
+      arrange(desc(Unemployment.Rate)) %>%
+      select(date, Unemployment.Rate) %>%
+      head(1)
+
+    print(highest_unemployment)
+
+    lowest_unemployment <- fed_rates %>%
+      arrange(Unemployment.Rate) %>%
+      select(date, Unemployment.Rate) %>%
+      head(1)
+
+    print(lowest_unemployment)
+
+    fed_rates <- fed_rates %>%
+      mutate(Decade = cut(Year, breaks = seq(1954, 2027, by = 10), labels = format(seq(1954, 2017, by = 10), format = "%Y")))
+
+    decade_avg_unemployment <- fed_rates %>%
+      group_by(Decade) %>%
+      summarise(AvgUnemploymentRate = mean(Unemployment.Rate, na.rm = TRUE))
+
+    highest_avg_unemployment_decade <- decade_avg_unemployment[which.max(decade_avg_unemployment$AvgUnemploymentRate), ]
+
+    print(highest_avg_unemployment_decade)
+    ```

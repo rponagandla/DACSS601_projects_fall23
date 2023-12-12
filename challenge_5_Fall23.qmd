@@ -1,0 +1,278 @@
+---
+title: "Challenge_5: Visualizing Time and Space"
+author: "Rachana Ponagandla"
+description: "A Holloween Special"
+date: "10/25/2023"
+format:
+  html:
+    df-print: paged
+    css: "styles.css"
+    embed-resources: true
+    self-contained-math: true
+categories:
+  - weekly_challenges
+  - challenge_5
+---
+
+**Make sure you change the author's name in the above YAML header.**
+
+## Setup
+
+If you have not installed the following packages, please install them before loading them.
+
+```{r}
+#| label: setup
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(readr)
+library(readxl)
+library(haven) #for loading other datafiles (SAS, STATA, SPSS, etc.)
+
+#for plotting time
+library(ggplot2) # if you have not installed this package, please install it.
+library(lubridate)
+
+
+#for plotting space
+library(sp)
+library(sf)
+library(maps)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(gifski)
+library(gganimate)
+
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Challenge Overview
+
+![Halloween2023](https://im.indiatimes.in/content/2023/Aug/halloween-2023-date1_64d222bb35bee.jpg?w=1100&h=535&cc=1){fig-align="center" width="431"}
+
+In this challenge, we will practice the visualization skills learned in the class with two datasets to capture the temporal and spatial patterns of supernatural phenomena.
+
+There will be coding components and writing components. Please read the instructions for each part and complete your challenges.
+
+## Datasets
+
+-   [Part 1. The UFO Sightings Data (50%)](#part-1.-the-ufo-sightings-data-50)
+-   [Part 2. The Haunted Places Data (50%)](#part-2.-the-haunted-places-data-50)
+
+Find the `_data` folder, then read the datasets using the correct R command.
+
+## Part 1. The UFO Sightings Data (50%) {#part-1.-the-ufo-sightings-data-50}
+
+This data contains over 80,000 reports of UFO sightings over the last century in six major countries (and other places). You can learn more about this data by checking: <https://www.kaggle.com/datasets/NUFORC/ufo-sightings>.
+
+1.  **Read and Describe the Data (10%)**
+
+    What is the dimension of the data? What do the columns mean? What is the unit of observation?
+
+```{r}
+ufo_data <- read_csv("_data/complete_UFO.csv", show_col_types = FALSE)
+ufo_data <- ufo_data %>% select(-ncol(ufo_data))
+head(ufo_data)
+
+```
+
+UFO data contains 88875 rows and 11 columns
+
+```{r}
+dim(ufo_data)
+```
+
+```{r}
+colnames(ufo_data)
+```
+
+**datetime**: The date and time of the UFO sighting.
+
+**city**: The city where the UFO was sighted.
+
+**state**: The state or region where the UFO was sighted.
+
+**country**: The country where the sighting occurred.
+
+**shape**: The shape of the UFO as reported.
+
+**duration** (seconds): The duration of the sighting in seconds.
+
+**duration** (hours/min): The duration of the sighting in hours or minutes.
+
+**comments**: Additional comments or details about the sighting.
+
+**date posted**: The date when the sighting was reported or posted.
+
+**latitude**: The latitude coordinate where the sighting occurred.
+
+**longitude**: The longitude coordinate where the sighting occurred.\
+\
+**Unit of Observation:**
+
+The unit of observation is an individual UFO sighting event. Each row in the dataframe represents one unique event of a UFO sighting detailing when and where it happened, for how long, the shape, along with any additional notes about the sighting.
+
+2.  Please plot a temporal/time-series graph to present the following patterns. **You may need to subset or mutate the data for graphing.**
+
+    \(1\) the total number of UFO sighting reports over the years (date_break = year). **(15%)**
+
+    ```{r}
+    ufo_data <- mutate(ufo_data, datetime = mdy(datetime))
+
+    ufo_data <- filter(ufo_data, !is.na(datetime))
+
+    ufo_data_yearly <- ufo_data %>%
+      count(year = year(datetime))
+
+    ggplot(ufo_data_yearly, aes(x = year, y = n)) +
+      geom_line() +
+      labs(title = "UFO Sighting Reports Over the Years",
+           x = "Year",
+           y = "Number of Reports") +
+      scale_x_continuous(breaks = seq(min(ufo_data_yearly$year), max(ufo_data_yearly$year)+10, by = 10 )) 
+    ```
+
+    \(2\) the total number of UFO sighting reports by months between 2010-01-01 and 2014-01-01. **(15%)**
+
+    ```{r}
+    ufo_data_monthly <- ufo_data %>%
+      filter(datetime >= as.Date('2010-01-01') & datetime < as.Date('2014-01-01')) %>%
+      mutate(yearmonth = floor_date(datetime, "month")) %>%
+      count(yearmonth)
+
+    ggplot(ufo_data_monthly, aes(x = yearmonth, y = n)) +
+      geom_line() +
+      scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+      labs(title = "Monthly UFO Sighting Reports (2010-2014)",
+           x = "Month",
+           y = "Number of Reports")
+    ```
+
+3.  Please write a paragraph describing the patterns you find on the two graphs above. **(10%)**
+
+    **First graph:**
+
+    From the first graph, we can observe that there are comparatively less number of UFO sighting reports between 1906 and 1970s. From 1970s, the number of reports gradually increased. From 1995 onwards, there is a drastic increase in the number of reports. Also, around 2014, we can see that there is a peak rise in number of reports. This trend suggests an increasing public interest or awareness in UFO phenomena or perhaps an increase in the actual occurrence of such events.
+
+    **Second graph:**
+
+    The second graph represents monthly UFO sighting reports from 2010 to 2014. We can see a consistent seasonal cycle in the monthly distribution of reports. Each year, we can observe that there are significantly less sighting reports during start and end of the year. Sightings increase in the summer months, reaching it's peak in the months around June and July, and then decreasing towards the december. The increased sightings during summer months might be because more people tend to stay outdoors during summers due to longer daylight hours and clearer night skies and thus having more opportunities to observe any unusual phenomena.
+
+4.  **(Optional)** Use `gganimte` and `gifsky` packages to plot gifs of the above time-series plots. You can refer to codes and commands in the Week#8 demo file.
+
+    ```{r}
+
+    ufo_animated_plot <- ggplot(ufo_data_yearly, aes(x = year, y = n, group = 1)) +
+      geom_line() +
+      geom_point() +
+      labs(title = "UFO Sighting Reports Over the Years", x = "Year", y = "Number of Reports") +
+      scale_x_continuous(breaks = seq(min(ufo_data_yearly$year), max(ufo_data_yearly$year) + 10, by = 10)) +
+      transition_reveal(year)
+
+    animate(ufo_animated_plot, duration = 20, fps = 10, width = 500, height = 500, renderer = gifski_renderer())
+
+    ```
+
+5.  **(Optional)** Suppose we are interested in describing the country variations in types and numbers of UFO sighting reports. How can we use bar plots to visualize the difference across countries (using the *country* column, you can recode the empty cells with "others")? **Note that you may need to do the data transformation or mutation needed to help graphing.**
+
+    ```{r}
+    recoded_ufo_data <- ufo_data %>%
+        mutate(country = ifelse(is.na(country), "others", country))
+
+
+    country_total_summarized <- recoded_ufo_data %>%
+      group_by(country) %>%
+      summarise(n = n())
+    ggplot(data = country_total_summarized, aes(x = factor(country), y = n)) +
+          geom_bar(stat = "identity", fill = "blue", na.rm = TRUE) +
+          labs(title = "UFO reports by Country", x = "Country", y = "Number of reports")
+    ```
+
+## Part 2. The Haunted Places Data (50%) {#part-2.-the-haunted-places-data-50}
+
+This data contains the reports of haunted places in the United States. The dataset was compiled by Tim Renner, using The Shadowlands Haunted Places Index, and shared on data.world. You can learn more about this data by checking: <https://www.kaggle.com/datasets/sujaykapadnis/haunted-places>
+
+1.  **Read and Describe the Data (10%) (Note: you don't need to remove the empty rows after the first row; `read_csv()` should automatically remove them).**
+
+    What is the dimension of the data? What do the columns mean? What is the unit of observation?
+
+    ```{r}
+    haunted_places <- read_csv("_data/haunted_places.csv")
+    head(haunted_places)
+
+    ```
+
+    Haunted places dataset contains 10992 rows and 10 columns
+
+    ```{r}
+    dim(haunted_places)
+    ```
+
+    ```{r}
+    colnames(haunted_places)
+    ```
+
+    **city**: The city where the haunted place is located.
+
+    **country**: The country where the haunted place is located, which in this dataset is the United States.
+
+    **description**: A brief description of the haunted place and experiences or phenomena associated with the place.
+
+    **location**: A more specific location or address of haunted place.
+
+    **state**: The state where the haunted place is located.
+
+    **state_abbrev**: The standard two-letter abbreviation for the state.
+
+    **longitude**: The longitude coordinate of the haunted place.
+
+    **latitude**: The latitude coordinate of the haunted place.
+
+    **city_longitude**: The longitude coordinate of the city center.
+
+    **city_latitude**: The latitude coordinate of the city center.
+
+    **Unit of Observation:**
+
+    The unit of observation in this dataset is an individual report of a haunted place. Each row corresponds to one specific location reported to be haunted, along with its geographical and descriptive details.
+
+2.  Plot a USA map with states boundaries. There are multiple ways of plotting this map. **(15%)**
+
+    You can use the `geom_polygon()` (which requires a data of spatial coordinates for plotting a polygon), or you can use `geom_sf()` (which requires a shapefile of the US). Please refer to the examples in the Week#8 demo file.
+
+    ```{r}
+
+    states_sf<-st_read("./_data/States_shapefile.shp")
+
+    usa_map <- map_data("state")
+    ggplot(data = states_sf) +
+      geom_sf() +
+      theme_minimal() +
+      labs(title = "Map of the USA with State Boundaries")
+
+    ```
+
+3.  Plot the haunted places using the *city_longtitude* and *city_latitude* with `geom_point()` on the USA map generated above. **(15%)**
+
+    ```{r}
+
+    ggplot(data = states_sf)+
+      geom_sf()+
+      geom_point(data = haunted_places, aes(x = city_longitude, y = city_latitude), color = "red", size = 0.001) +
+      theme_minimal() +
+      labs(title = "Haunted places on the USA Map")
+
+    ```
+
+4.  Please write a paragraph describing the pattern of the haunted spaces you find on the map above. **(10%)**
+
+    The map shows the distribution of haunted places across the United States. There appears to be significant density of reports along the East Coast and throughout the Eastern half of the country. The West Coast, particularly California, also shows a significant concentration of haunted locations. Whereas, in the central states there is smaller distribution of haunted places compared to East Coast.
+
+    ```{r}
+    haunted_places %>%
+      group_by(state) %>%
+      summarise(Number_of_places = n()) %>%
+      arrange(desc(Number_of_places))
+    ```

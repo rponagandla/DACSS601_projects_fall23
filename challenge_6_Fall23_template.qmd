@@ -1,0 +1,176 @@
+---
+title: "Challenge_6: Basic Principles of Data-Driven Story-telling"
+author: "Rachana Ponagandla"
+description: "this is the formal version with updated instructions"
+date: "11/15/2023"
+format:
+  html:
+    df-print: paged
+    css: "styles.css"
+    embed-resources: true
+    self-contained-math: true
+categories:
+  - weekly_challenges
+  - challenge_6
+---
+
+**Make sure you change the author's name in the above YAML header.**
+
+## Challenge Overview
+
+In this challenge, we will mainly apply the principles we learned from Jane Miller's book in practice. You will review multiple examples of data description and presentation intext, table/number, and charts/figures. Please read the instructions for each part and complete your challenges.
+
+**For all the screenshots, images, or tables mentioned in the questions, please see the Challenge_6_Fall23.html file. You don't need to include any of these items in your rendered challenge file.**
+
+## Part 1. Simple Applications {#part-1.-the-ufo-sightings-data-50}
+
+1.  **Recall Jane Miller's Ws mentioned in Chapter 2. One of the W's (Who, What, When, and Where, Why) is missing from each of the following table descriptions. Rewrite each sentence to include that information.**
+
+    ![](Ch1_table2b.png)
+
+    a.  "Germany did the best at the 2002 Winter Olympics, with 35 medals, compared to 34 for the United States, 24 for Norway, and 17 for Canada."
+
+        Germany did the best at the 2002 Winter Olympics, with 35 medals, compared to 34 medals for the United States, 24 medals for Norway, and 17 medals for Canada.
+
+    b.  "Gold, silver, and bronze medals each accounted for about one-third of the medal total."
+
+        At the 2002 Winter Olympics, gold, silver, and bronze medals each accounted for about one-third of the total medals won by each country.
+
+    c.  "At the 2002 Winter Olympics, the United States won more medals than all other countries, followed by Canada, Germany, and Norway."
+
+        At the 2002 Winter Olympics, the United States won more bronze medals than all other countries, followed by Canada, Germany, and Norway.
+
+2.  **For each of the following situations, specify whether you would use prose of text, a table of numbers, or a particular type of chart/figure. Explain why you chose this way to present the data.**
+
+    a.  Statistics on five types of air pollutants in the 10 largest US cities for a government report
+
+        A **table of numbers** would be the effective for this situation. It allows to present exact figures for each type of pollutant in each city and it allows for easy comparison across different cities and pollutants. Each row could represent a city, and each column could represent a type of pollutant
+
+    b.  Trends in the value of three stock market indices over one year for a web page
+
+        A l**ine chart** would be effective for this situation. It can clearly show the trends over time and allows for easy comparison between the three indices. It will help to easily see the ups and downs of each index over the course of a year, and compare the performance of the three indices
+
+    c.  Notification to other employees in your corporation of a change in shipping fees
+
+        **Prose of text** would be effective for this situation. This is the most direct and clear way to communicate changes. It allows for clear communication and can provide context or explanation for the change in shipping fees.
+
+    d.  Distribution of voter preferences for grade-level composition of a new middle school (grades 5--8, grades 6--8, or grades 6--9) for a presentation at a local school board meeting
+
+        A **bar chart** would be effective for this situation. A bar chart would allow for a clear visual comparison of the number of votes each grade-level composition option received. This will help to quickly understand which option is the most popular among voters.
+
+    e.  National estimates of the number of uninsured among part-time and full-time workers for an introductory section of an article analyzing effects of employment on insurance coverage in New York City
+
+        A **table of numbers** would be effective in this situation as they are good for presenting exact values(). They are also straightforward and easy to understand, making them suitable for an introductory section of an article.\
+        \
+        We can also use **bar chart.** This would allow readers to visually compare the number of uninsured workers in each category, making the differences clearly visible.\
+        \
+        A table would allow for precise numbers to be communicated, while a bar chart would allow for a visual comparison between part-time and full-time workers
+
+3.  **Read the sentences below. What additional information would someone need in order to answer the associated question?**
+
+    a.  "Brand X costs twice as much as Brand Q. Can I afford Brand X?"
+
+        We would need the actual price of Brand Q to calculate the price of Brand X. Also, we would need to know the budget or the amount of money available to spend.
+
+    b.  "My uncle is 6'6" tall? Will he fit in my new car?"
+
+        We would need the interior dimensions of the car, specifically the headroom and legroom. Also, we need to know the comfort level their uncle requires.
+
+    c.  "New Diet Limelite has 25% fewer calories than Diet Fizzjuice. How much faster will I lose weight on Diet Limelite?"
+
+        We need to know the number of calories in Diet Fizzjuice to calculate the number of calories in New Diet Limelite. We also need to know their total daily calorie intake and expenditure to understand how this change affects their overall weight loss. Rate of weight loss will also depend on the biological factors like their current weight, height, metabolic rate, gender, activity level.
+
+    d.  "It has been above 25 degrees every day. We're really having a warm month, aren't we?"
+
+        We need to know the average temperature for this time of year in their location to determine if this is warmer than usual. Also we need to know the temperature scale (Celsius or Fahrenheit) in which the current temperature is measured.
+
+4.  **Indicate whether each of the following sentences correctly reflects table 4B. If not, rewrite the sentence so that it is correct. Check both the correctness and completeness of these sentences.**
+
+    Note: According to [Wikipedia](https://en.wikipedia.org/wiki/Voter_turnout), " In political science, voter turnout is the participation rate (often defined as those who cast a ballot) of a given election. This is typically the percentage of registered, eligible, or all voting-age people."
+
+    ![](Ch5_table4b.png)
+
+    a.  Between 1964 and 1996, there was a steady decline in voter participation.
+
+        Sentence is incorrect.
+
+        Between 1964 and 1996, there was a general decline in voter participation among registered voters, although it increased in the year 1992.
+
+    b.  Voter turnout was better in 1996 (63.4%) than in 1964 (61.9%).
+
+        Sentence is incorrect.
+
+        Voter turnout among registered voters was better in 1964 (95.8%) compared to 1996 (63.4%).
+
+    c.  The majority of all registered voters participated in the 1964 US presidential election.
+
+        Sentence is correct.
+
+        It can be completely written as "The majority of all registered voters(95.8%) participated in the 1964 US presidential election"
+
+    d.  The best year for voter turnout was 1992, with 104,600 people voting.
+
+        Sentence is incorrect.
+
+        The year with the highest number of people voting was 1992, with 104,600 thousand votes. However, the best year for voter turnout among registered voters was 1964, with 95.8% participation.
+
+    e.  A higher percentage of the voting-age population was registered to vote in 1996 than in 1964.
+
+        Sentence is correct.
+
+        It can be completely written as "A higher percentage of the voting-age population was registered to vote in 1996 (74.4%) than in 1964 (64.6%)".
+
+    f.  **Identify terms that need to be defined or restated for a non-technical audience without much knowledge about the topic or statistical method. You don't need to explain these terms (you don't need to know any of the statistical methods mentioned).** **Just identify them.**
+
+        a\. "According to the latest study based on the [VDem Dataset](https://v-dem.net/data/the-v-dem-dataset/), the average Rule of Law score is statistically higher in democratic countries than non-democratic countries based on a t-test (p = 0.01)."
+
+        **Answer:** VDem Dataset, Rule of Law score, Statistically higher, t-test, p
+
+        b\. " According to the logistic regression results in the screenshot below, we can see a positive correlation between household income and the vote choice for G.W. Bush, with a positive coefficient (log-odd = 0.33). "
+
+        ![](bushvote.png)\
+        **Answer:**
+
+        Terms from the text:
+
+        logistic regression, positive correlation, positive coefficient, log-odd
+
+        Terms from the image:
+
+        glm, bionmial, logit, Intercept, coef.est, coef.se
+
+        # Part 2. Practical Applications
+
+5.  **Suppose you work as a data analyst in the music-producing industry. One day, you get a data report that studies the popularity of different genres of music. The following scatterplot is presented to you. There is no text description for either this table or the data.**
+
+    ![](example_project.png)
+
+    \(1\) What information can you describe or summarize based on the current graph?
+
+    The scatterplot represents the popularity of different genres of music, with the y-axis labeled 'pop' suggesting it measures popularity, probably as a score or a percentage, and the x-axis labeled 'variable_1' possibly representing different genres encoded numerically. Each point on the scatterplot corresponds to an individual song's popularity within its genre.
+
+    We can observe that the genres encoded as 5, 6, 8, 9, 10, 12 has most of its songs with a popularity more than 50. We can also observe that, in the genre encoded as 3, there are songs with wide range of popularity levels ranging from 0 to 100. But, we need to note that we can't get a clear understanding about how many songs are present in each genre and as some of the points overlap(like in the genre encoded as 3). It is also hard to tell how many songs in a specific genre has similar level of popularity when the points overlap.
+
+    \(2\) Thinking of the principles we learned in the week of visualization customization and Jane Miller's principles, What additional information (Please describe at least three things (at least one thing that is NOT about graph customization, such as title, color, label, etc.) that you consider adding this table so that it can convey meaningful information.
+
+    **Legend**: We can introduce a legend that specifies the genre that each numerical code corresponds to. It helps in getting clear understanding of the genre that the numerical code is representing.
+
+    **Count**: Knowing how many songs are in each genre helps to understand the popularity score better. In a scatter plot, points can overlap, making it hard to determine the number of songs in each genre. So, without knowing the number of songs, it's hard to tell if many songs have a similar level of popularity.
+
+    **Labels**: There should be appropriate and descriptive labels for both X-axis and Y-axis for better understanding. The label for X-axis can be "Music Genre" instead of "variable_1". Similarly, the label for Y-axis can be "popularity" instead of "pop".
+
+    **Title:** We can add appropriate title to the graph which helps in understanding what the graph is about.
+
+    (For your reference, this is the original source of the dataset: <https://www.kaggle.com/datasets/leonardopena/top-spotify-songs-from-20102019-by-year>)
+
+6.  **Two articles on scientific studies talk about the "risks." Please read the titles and quotes from these two articles and answer the following two questions.**
+
+    ![](risks.png)
+
+    \(1\) Given the information provided, in which case is there a greater "risk": the Pancreatic Cancer case or the Diabetes case?
+
+    **Answer:** We can't compare which case has greater risk because these two studies are measuring risk over different time frames and with different consumption patterns. The first study is looking at the risk of pancreatic cancer from consuming two or more sodas per week, but it doesn't specify the duration of this consumption pattern, whereas the second study is looking at the risk of Type 2 Diabetes from consuming one sugar-sweetened beverage per day over a decade.
+
+    \(2\) Think of Jane Miller's principles. What additional information would you need to know to compare the "risk" in the two cases?
+
+    **Answer:** According to Jane Miller's principles, we need to know the duration of soda consumption that leads to the stated risks in both studies. One study mentions a decade, but the other doesn't specify a time frame. We also need to know the characteristics of the populations studied in both cases. Are they similar in terms of age, gender, lifestyle, and other factors that could influence the risk of developing pancreatic cancer or Type 2 diabetes.

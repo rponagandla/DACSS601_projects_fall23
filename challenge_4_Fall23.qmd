@@ -1,0 +1,392 @@
+---
+title: "Challenge_4: Intro to Visulization: Univariate and Multivariate Graphs"
+author: "Rachana Ponagandla"
+description: ""
+date: "10/18/2023"
+format:
+  html:
+    df-print: paged
+    css: "styles.css"
+    embed-resources: true
+    self-contained-math: true
+categories:
+  - weekly_challenges
+  - challenge_4
+---
+
+**Make sure you change the author's name in the above YAML header.**
+
+## Setup
+
+If you have not installed the following packages, please install them before loading them.
+
+```{r}
+#| label: setup
+#| warning: false
+#| message: false
+
+library(tidyverse)
+library(readxl)
+library(haven) #for loading other datafiles (SAS, STATA, SPSS, etc.)
+library(stringr) # if you have not installed this package, please install it.
+library(ggplot2) # if you have not installed this package, please install it.
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Challenge Overview
+
+In this challenge, we will practice with the data we worked on in the previous challenges and the data you choose to do some simple data visualizations using the `ggplot2` package.
+
+There will be coding components and writing components. Please read the instructions for each part and complete your challenges.
+
+## Datasets
+
+-   Part 1 the ESS_Polity Data (created in Challenge#3) ⭐⭐
+-   Part 2: the Australia Data⭐⭐
+-   Part 3: see [Part 3. Practice plotting with a dataset of your choice (25% of the total grade)](#part-3.-practice-plotting-with-a-dataset-of-your-choice-25-of-the-total-grade). For online platforms of free data, see [Appendix: sources for data to be used in Part 3].
+
+Find the `_data` folder, then read the datasets using the correct R command.
+
+## Part 1. Univariate and Multivariate Graphs (45% of the total grade)
+
+We have been working with these two data in the previous three challenges. Suppose we have a research project that studies European citizens' social behaviors and public opinions, and we are interested in how the countries that respondents live in influence their behavior and opinion. In this challenge, let's work with the combined dataset *ESS_Polity* and create some visualizations.
+
+1.  **Read the combined data you created last time. (2.5%)**
+
+```{r}
+
+ESS_Polity <- read_csv("_data/ESS_Polity.csv")
+head(ESS_Polity)
+
+```
+
+2.  **Suppose we are interested in the central tendencies and distributions of the following variables. At the individual level:** *age, male, edu, income_10,* and *vote*. **At the country level**: *democ*.
+
+    \(1\) Recode the "vote" column: if the value is 1, recode it as 1; if the value is 2, recode it as 0; if the value is 3, recode it as NA. **Make sure to include a sanity check for the recoded data. (2.5%)**
+
+    ```{r}
+
+    ESS_Polity <- ESS_Polity %>%
+      mutate(vote = recode(vote, `1` = 1, `2` = 0, `3` = NA_real_))
+
+
+    head(ESS_Polity)
+
+    unique(ESS_Polity$vote)
+
+    table(ESS_Polity$vote, useNA="always")
+
+    ```
+
+    \(2\) For each of the five variables (*age, edu, income_10,* *vote,* and *democ)*, please choose an appropriate type of univariate graph to plot the central tendencies and distribution of the variables. Explain why you choose this type of graph to present a particular variable (for example: "For example, I use a histogram to plot *age* because it is a continuous numeric variable"). **(25%)**
+
+    **(Note: You should use at least two types of univariate graphs covered in the lecture.)**
+
+    I used Histogram for plotting age as it is a continuous numeric variable.
+
+    ```{r}
+
+    ggplot(ESS_Polity, aes(x = age)) +
+      geom_histogram(binwidth = 2, fill = "blue", color = "black") +
+      labs(x = "Age", y = "Count", title = "Histogram of Age")
+
+    ```
+
+    I used bar plot for edu because edu has small number of ordinal values (1,2,3,4). Bar plot is suitable for visualizing ordinal or categorical data. It helps to visualize the frequency or count of each educational level.
+
+    ```{r}
+
+    ggplot(ESS_Polity, aes(x=edu)) +
+      geom_bar(fill="blue") +
+      labs(title="Education Level", x="Education Level")
+
+    ```
+
+    I used bar plot for income_10 because it has 10 discrete decile values. Bar plot is suitable for visualizing ordinal or categorical data. So, it is suitable and helpful in visualizing frequency or count of people at each income decile.
+
+    ```{r}
+
+    ggplot(filter(ESS_Polity,!is.na(income_10)), aes(x=factor(income_10))) +
+      geom_bar(fill="blue") +
+      labs(title="Income Level Distribution", x="Income Level", y="Count")
+    ```
+
+    I used bar plot for Vote because the vote column contains either 0 or 1. Bar plot is suitable for visualizing ordinal or categorical data. So, we can effectively visualize frequency or count of people in two categories 0 or 1
+
+    ```{r}
+    ggplot(filter(ESS_Polity, !is.na(vote)), aes(x=factor(vote))) +
+      geom_bar(fill="blue") +
+      labs(title="Vote Distribution", x="Vote", y="Count")
+    ```
+
+    I used bar plot to visualize democracy levels because democ column contains different democracy levels. Bar plot is suitable for visualizing ordinal or categorical data. So, we can effectively visualize the frequency or count at each democracy level.
+
+    ```{r}
+    ggplot(filter(ESS_Polity, !is.na(democ)), aes(x=factor(democ))) +
+      geom_bar(fill="blue") +
+      labs(title="Democracy Level Distribution", x="Democracy Level", y="Count")
+
+    ```
+
+3.  **Suppose we want to test two hypotheses on the relationships of two pairs of variables**. **Please use the appropriate type of graphs we learned to visualize these two pairs of variables. Briefly describe the graph you plot, and answer: Does the graph we create from the data support the hypothesis?**
+
+    \(1\) Hypothesis#1: The more years of education (edu) a person completed, the higher income (income_10) they earn. **(7.5%)**
+
+    I have plotted both scatter plot and Grouped bar plot between edu and income_10. The scatter plot of Education and Income doesn't display a clear pattern as the data is spread over across all education and income levels. However, when I plotted the grouped bar plot, I can see clear pattern. The plot shows a trend where higher income deciles (e.g., 8, 9, 10) tend to have more representation as the years of education increase. Conversely, lower income deciles (e.g., 1, 2, 3) are more prominent at lower levels of education. This trend supports the hypothesis that "The more years of education a person completed, the higher income they earn."
+
+    ```{r}
+    ggplot(filter(ESS_Polity, !is.na(edu), !is.na(income_10)), aes(x = edu, y = income_10)) +
+      geom_point() +
+      labs(x = "Years of Education", y = "Income", title = "Scatter Plot of Education and Income")
+    ```
+
+    ```{r}
+    ggplot(filter(ESS_Polity,!is.na(income_10),!is.na(edu)), aes(x=factor(edu), fill=factor(income_10))) +
+      geom_bar(position="dodge") +
+      labs(title="Grouped bar plot of Education and Income", x="Education level", y="Count")
+    ```
+
+    \(2\) Hypothesis#2: There is a gender disparity (male) in voting behavior (vote). (Either men are more likely to vote, or women are more likely to vote). **(7.5%)**
+
+    I have plotted grouped bar plot between vote and male columns. When I observe the plot, there doesn't seem to be much gender disparity in the voting behavior. I see that voting behavior is relatively similar between men and women. As there is no significant difference, I observed that there is no gender disparity in voting behavior. So, the graph doesn't support the hypothesis.
+
+    ```{r}
+
+    ggplot(filter(ESS_Polity, !is.na(vote), !is.na(male)), aes(x=factor(vote), fill=factor(male))) +
+      geom_bar(position="dodge") +
+      labs(title="Gender Disparity in Voting Behavior",
+           x="Voting Behavior",
+           y="Count")
+    ```
+
+## Part 2. Comparing between Partial and Whole, and among Groups (30% of the total grade)
+
+In this part, we will use the clean version of the Australian public opinion poll on Same-Sex Marriage to generate graphs and plots. **You may need to do the data transformation or mutation needed to help graphing.**
+
+1.  Read in data. **(2.5%)**
+
+    ```{r}
+    #type of your code/command here.
+    australian_data <- read_csv("_data/australian_data.csv", show_col_types = FALSE)
+    head(australian_data)
+
+    ```
+
+2.  Use a barplot to graph the Australian data based on their responses: yes, no, illegible, and no response. The y-axis should be the count of responses, and each response should be represented by one individual bar (so there should be four bars). **(7.5%)**
+
+    (you can use either geom_bar() or geom_col())
+
+    ```{r}
+    # converting it to tidy data
+    australian_data <- australian_data %>%
+      gather(key = "Response", value = "Count", Yes, No, Illegible, `No Response`)
+
+    head(australian_data)
+
+    summarized_data <- australian_data %>%
+      group_by(Response) %>%
+      summarise(Total_Count = sum(Count))
+
+    # barplot
+    ggplot(summarized_data, aes(x = Response, y = Total_Count)) +
+      geom_bar(stat = "identity", fill="blue") +
+      xlab("Response") +
+      ylab("Count") +
+      ggtitle("Australian Data based on Responses")
+
+    ```
+
+3.  The previous graph only shows the difference in amount. Let's create a stacked-to-100% barplot to show the proportion of each of the four responses (by % of the total response). **(7.5%)**
+
+    (you can use either geom_bar() or geom_col())
+
+    ```{r}
+    summarized_data <- australian_data %>%
+      group_by(Response) %>%
+      summarise(Total_Count = sum(Count))
+
+    # Calculate the total number of responses
+    total_responses = sum(summarized_data$Total_Count)
+
+    # Calculate the percentages
+    summarized_data$Percentage = (summarized_data$Total_Count / total_responses) * 100
+
+    # Plotting
+    ggplot(summarized_data, aes(x = "", y = Percentage, fill = Response)) +
+      geom_bar(stat = "identity") +
+      ylab("Percentage") +
+      xlab("") +
+      ggtitle("Proportion of Each Response") +
+      scale_y_continuous(labels = scales::percent_format(scale = 1))
+
+    ```
+
+4.  Let's see if there's a relationship between Division and Response - that is, are certain divisions more likely to respond one way compared to other divisions? Again, we will use barplot(s) to present the visualization. **(12.5%)**
+
+    (you can use either geom_bar() or geom_col())
+
+    ```{r}
+
+    division_summary <- australian_data %>%
+      group_by(Division, Response) %>%
+      summarise(Total_Count = sum(Count), .groups = 'drop')
+
+    # grouped barplot
+    ggplot(division_summary, aes(x = Division, y = Total_Count, fill = Response)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      xlab("Division") +
+      ylab("Count") +
+      ggtitle("Grouped Barplot of Response by Division") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+    # stacked barplot
+    ggplot(division_summary, aes(x = Division, y = Total_Count, fill = Response)) +
+      geom_bar(stat = "identity") +
+      xlab("Division") +
+      ylab("Count") +
+      ggtitle("Stacked Barplot of Response by Division") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+    ```
+
+    From the above grouped and stacked bar plots, we can infer the following:
+
+    **New South Wales Divisions** has the highest overall response counts, with "Yes" being the most dominant response followed by "No", "No.Response". "Illegible" response is minimal.
+
+    **Victoria Divisions and Queensland Divisions** also shows a dominant "Yes" response followed by"No" and "No.Response". Illegible responses for both divisions are again minimal
+
+    **South Australia Divisions and Western Australia Divisions** has "Yes" being the dominant response. In both these divisions, the proportion of "No" and "No.Response" are almost equal. "Illegible" response is minimal.
+
+    **Northern Territory Divisions, Australian Capital Territory Divisions and Tasmania Divisions** have low overall response counts. In Tasmania and Australian Capital Territory Divisions, "Yes" is little more dominant compared to other responses, whereas in Northern Territory Divisions, "Yes", "No" and "No.Response" seem to have similar proportions.
+
+## Part 3. Practice plotting with a dataset of your choice (25% of the total grade) {#part-3.-practice-plotting-with-a-dataset-of-your-choice-25-of-the-total-grade}
+
+In this part, you will choose data of your interests for graphing and plotting. This data can be tidy/ready-to-be-used or raw data that needs cleaning. If the data is very large (for example, more than 20 columns), you should definitely subset the data by selecting less than 10 variables of your interests to avoid taking too much room in your R memory.
+
+1.  Include a link to the data page (this page should include the introduction or description and the link to download this dataset). **(2%)**
+
+    <https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset>
+
+2.  Read the data you choose and briefly answer the following questions. (Optional: you may need to subset, clean, and transform the data if necessary). **(8%)**
+
+    ```{r}
+    sleep_data <- read_csv("_data/Sleep_health_and_lifestyle_dataset.csv", show_col_types = FALSE)
+
+    # selecting 10 variables
+    sleep_data <- sleep_data %>%
+      select(`Person ID`, "Gender", "Age", "Occupation", `Sleep Duration`, 
+             `Quality of Sleep`, `Physical Activity Level`, `Stress Level`, 
+             `Heart Rate`, `Daily Steps`)
+
+    head(sleep_data)
+    ```
+
+    \(1\) what is the structure (dimension) of the data;
+
+    Data has 374 rows and 10 dolumns
+
+    ```{r}
+    dim(sleep_data)
+    ```
+
+    \(2\) what is the unit of observation?
+
+    The unit of observation in this dataset is an individual person. Each row represents data collected from one individual.
+
+    \(3\) what does each column mean in this data?
+
+    ```{r}
+    colnames(sleep_data)
+    ```
+
+    -   **Person ID**: A unique identifier for each individual in the dataset.
+
+    -   **Gender**: The gender of the individual (e.g., Male, Female).
+
+    -   **Age**: The age of the individual in years.
+
+    -   **Occupation**: The occupation or job of the individual(e.g, Software Engineer, Nurse).
+
+    -   **Sleep Duration**: The number of hours the person sleeps per day
+
+    -   **Quality of Sleep**: A rating for the quality of sleep on a scale(1-10).
+
+    -   **Physical Activity Level**: The number of minutes the person engages in physical activity daily.
+
+    -   **Stress Level**: A rating for the stress level experienced by the person on a scale(1-10).
+
+    -   **Heart Rate**: The resting heart rate of the person in beats per minute.
+
+    -   **Daily Steps**: The number of steps the individual takes in a day.
+
+3.  Choose two columns/variables of your interests. Plot one univariate graph for each of the variables. **(5%)**
+
+    I choose 'Age' and 'Occupation' columns to plot univariate graphs.
+
+    I used Histogram for plotting age as it is a continuous numeric variable
+
+    ```{r}
+    ggplot(sleep_data, aes(x=Age)) +
+      geom_histogram(binwidth=1, fill="lightblue", color="black") +
+      labs(title="Histogram of Age", x="Age", y="Frequency")
+    ```
+
+    I used bar plot for plotting occupation as the occupation is a categorical variable. The bar plot will perfectly show the frequencies corresponding to different type of occupations.\
+
+    ```{r}
+    ggplot(sleep_data, aes(x=Occupation)) +
+      geom_bar(fill="lightblue", color="black") +
+      labs(title="Bar Plot of Occupation", x="Occupation", y="Frequency") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    ```
+
+<!-- -->
+
+4.  Choose a pair of variables you suspect or hypothesize may be correlated and a graph (scatter plot or barplot) using them. Based on the visual evidence, do you see any potential correlation between the two variables **(10%)**
+
+    I'm plotting 2 graphs.
+
+    1.  I choose Stress Level and Quality of Sleep variables and plotted a scatter plot to find correlation between them. Based on the visual evidence, I see that there is potential negative correlation which indicates that less quality of sleep corresponds to higher stress levels.
+
+    ```{r}
+    ggplot(sleep_data, aes(x=`Stress Level`, y=`Quality of Sleep`)) +
+      geom_point(color="blue") +
+      labs(title="Scatter Plot of Quality of Sleep vs Stress Level", x="Quality of Sleep", y="Stress Level") + geom_smooth()
+    ```
+
+    \
+
+    2.  I also choose Sleep Duration and Quality of Sleep variables and plotted a scatter plot to find correlation between them. Based on the visual evidence, I see that there is potential positive correlation which indicates that more quality of sleep corresponds to more sleep duration.
+
+    ```{r}
+    ggplot(sleep_data, aes(x=`Sleep Duration`, y=`Quality of Sleep`)) +
+      geom_point(color="blue") +
+      labs(title="Scatter Plot of Quality of Sleep vs Sleep Duration", x="Quality of Sleep", y="Sleep Duration")+geom_smooth()
+    ```
+
+## Appendix: sources for data to be used in Part 3
+
+**Here are some online sources and popular Online Dataset Hub:**
+
+1.  Many US governments (usually at the federal and state levels),  bureaus, and departments have open data archives on their websites, allowing the public to access, download, and use them. Just use Google to search for them.
+
+<!-- -->
+
+2.  [**The Harvard Dataverse Repository**](https://dataverse.harvard.edu/) is a free data repository open to all researchers from any discipline, inside and outside the Harvard community, where you can share, archive, cite, access, and explore research data. Each individual Dataverse collection is a customizable collection of datasets (or a virtual repository) for organizing, managing, and showcasing datasets.
+
+<!-- -->
+
+3.  [**Inter-university Consortium for Political and Social Research (ICPSR)**](https://www.icpsr.umich.edu/web/pages/ICPSR/index.html) of the University of Michigan-Ann Arbor provides leadership and training in data access, curation, and methods of analysis for the social science research community. 
+
+<!-- -->
+
+4.  **UN: <https://data.un.org/>**
+
+<!-- -->
+
+5.  [**OECD Data**](https://data.oecd.org/):  economic and development data of the most developed countries in the world.
+
+<!-- -->
+
+6.  The upper five sources are mainly for social science data; **there is another very big community and open data archives for machine-learning and data science: [Kaggle](https://www.kaggle.com/datasets).**
